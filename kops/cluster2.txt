@@ -1,0 +1,8 @@
+kops create cluster --zones us-east-1b,us-east-1a,us-east-1c --node-count 3 --cloud aws --networking calico --master-count 3 --master-zones us-east-1b,us-east-1a,us-east-1c --network-cidr 172.15.0.0/16 --name dockermeetup2.k8s.rivendel.intra --dns private
+kops --name dockermeetup2.k8s.rivendel.intra validate cluster
+kubectl create -f https://raw.githubusercontent.com/kubernetes/kops/master/addons/kubernetes-dashboard/v1.8.1.yaml
+kubectl create -f https://raw.githubusercontent.com/kubernetes/kops/master/addons/monitoring-standalone/v1.7.0.yaml
+kubectl config view
+kubectl run my-nginx --image=nginx --replicas=2 --port=80
+kubectl expose deployment my-nginx --port=80 --type=LoadBalancer
+kops delete cluster --name dockermeetup2.k8s.rivendel.intra --yes

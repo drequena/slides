@@ -1,0 +1,12 @@
+kops create cluster --zones us-east-1b --cloud aws --topology private --networking weave --name dockermeetup.k8s.rivendel.intra --dns private
+kubectl create -f https://raw.githubusercontent.com/kubernetes/kops/master/addons/kubernetes-dashboard/v1.8.1.yaml
+kubectl create -f https://raw.githubusercontent.com/kubernetes/kops/master/addons/monitoring-standalone/v1.7.0.yaml
+kubectl config view
+kubectl run my-nginx --image=nginx --replicas=2 --port=80
+kubectl expose deployment my-nginx --port=80 --type=LoadBalancer
+metadata
+  name:
+  annotations:
+    service.beta.kubernetes.io/aws-load-balancer-internal: 0.0.0.0/0
+    dns.alpha.kubernetes.io/internal: nginx.k8s.rivendel.intra
+kops delete cluster --name dockermeetup.k8s.rivendel.intra --yes
