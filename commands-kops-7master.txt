@@ -1,0 +1,33 @@
+kops create cluster -t private --node-count 3 --zones us-east-2a,us-east-2b,us-east-2c --networking weave --name kube.7masters.containers.intra --dns private --cloud aws
+kops update cluster kube.7masters.containers.intra --yes
+kubectl apply -f https://raw.githubusercontent.com/kubernetes/kops/master/addons/monitoring-standalone/v1.7.0.yaml
+kubectl create -f https://raw.githubusercontent.com/kubernetes/kops/master/addons/kubernetes-dashboard/v1.8.3.yaml
+kubectl get svc -n kube-system
+kubectl create -f ./dash-user.yaml
+kubectl -n kube-system describe secret $(kubectl -n kube-system get secret | grep admin-user | awk '{print $1}') | egrep ^token:
+kubectl run nginx --image=nginxdemos/hello --replicas=3 --port=80
+kubectl expose deploy nginx --port=80 --type=LoadBalancer
+kops delete cluster --name kube.7masters.containers.intra --yes
+
+
+
+dash-user.yaml (content)
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: admin-user
+  namespace: kube-system
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: admin-user
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: cluster-admin
+subjects:
+- kind: ServiceAccount
+  name: admin-user
+  namespace: kube-system
